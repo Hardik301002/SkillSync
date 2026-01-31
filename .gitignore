@@ -1,0 +1,21 @@
+# Dependency directories
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Environment variables (SECURITY RISK if uploaded)
+.env
+client/.env
+server/.env
+
+# Build outputs
+dist/
+build/
+
+# Uploaded files (We don't want demo images on GitHub)
+server/uploads/*
+!server/uploads/.gitkeep
+
+# System files
+.DS_Store
+Thumbs.db
