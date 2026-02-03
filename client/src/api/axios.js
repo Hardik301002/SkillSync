@@ -1,12 +1,7 @@
 import axios from 'axios';
 
-// Automatically detect if we are on localhost or deployed
-const isDevelopment = import.meta.env.MODE === 'development';
-
 const API = axios.create({
-    baseURL: isDevelopment 
-        ? 'http://localhost:5000/api/v1' 
-        : 'https://skillsync-1ppr.onrender.com/api/v1' 
+    baseURL: 'https://skillsync-1ppr.onrender.com/api/v1'
 });
 
 API.interceptors.request.use((req) => {
