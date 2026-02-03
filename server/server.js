@@ -14,12 +14,21 @@ const app = express();
 connectDB();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: '*', 
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true
+}));
+
 app.use(express.json());
 
-// here i use 'uploads' directly to match Multer's relative path configuration.
-// This ensures that wherever Multer saves the file, Express looks in the same place.
+// Uploads Folder
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// This lets you open your Render URL in a browser to check if it's working
+app.get('/', (req, res) => {
+    res.send('API is running successfully!');
+});
 
 // Routes
 app.use('/api/v1', require('./routes/mainRoutes'));
