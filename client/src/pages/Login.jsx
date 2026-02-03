@@ -33,10 +33,10 @@ const Login = () => {
             toast.success("Login Successful! 🚀");
             
             // Redirect based on Role
-            if (res.data.role === 'recruiter') {
-                window.location.href = '/dashboard';
+             if (res.data.role === 'recruiter') {
+             navigate('/dashboard');
             } else {
-                window.location.href = '/dashboard';
+             navigate('/dashboard');
             }
 
         } catch (err) {

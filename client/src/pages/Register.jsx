@@ -38,7 +38,7 @@ const Register = () => {
             localStorage.setItem('user', JSON.stringify(userObj));
 
             toast.success(`Welcome, ${res.data.name}!`);
-            window.location.href = '/dashboard';
+            navigate('/dashboard');
 
         } catch (err) {
             console.error(err);
