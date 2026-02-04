@@ -15,7 +15,10 @@ connectDB();
 
 // Middleware
 app.use(cors({
-    origin: '*', 
+    origin: [
+        "http://localhost:5173",                  // Your Local Frontend
+        "https://gleaming-marshmallow-fef403.netlify.app" // Your Netlify Frontend (Check your exact URL!)
+    ],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
 }));

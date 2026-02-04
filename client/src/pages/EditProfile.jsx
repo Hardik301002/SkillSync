@@ -16,19 +16,22 @@ const EditProfile = () => {
     const [resumeFile, setResumeFile] = useState(null);
     const [currentUser, setCurrentUser] = useState(null);
 
+   
+    const BASE_URL = 'https://skillsync-1ppr.onrender.com';
+
     useEffect(() => {
         const rawUser = localStorage.getItem('user');
         if (rawUser) {
             const user = JSON.parse(rawUser);
             setCurrentUser(user);
             setName(user.name || '');
-            setSkills(user.skills ? user.skills.join(', ') : '');
+            setSkills(user.skills ? (Array.isArray(user.skills) ? user.skills.join(', ') : user.skills) : '');
             setBio(user.bio || '');
             
-            //  Extract ONLY the filename (Matches Profile.jsx logic)
+            // ✅ FIX 2: Use the Render URL for the image preview
             if (user.avatar) {
                 const filename = user.avatar.split(/[/\\]/).pop();
-                setAvatarPreview(`http://localhost:5000/uploads/${filename}`);
+                setAvatarPreview(`${BASE_URL}/uploads/${filename}`);
             }
         } else {
             navigate('/login');
@@ -57,9 +60,7 @@ const EditProfile = () => {
         setLoading(true);
         
         try {
-            const token = localStorage.getItem('token');
-            const config = { headers: { 'x-auth-token': token, 'Content-Type': 'multipart/form-data' } };
-
+            // ✅ FIX 3: Let axios handle the headers (removed manual x-auth-token)
             const formData = new FormData();
             formData.append('name', name);
             formData.append('skills', skills);
@@ -67,7 +68,8 @@ const EditProfile = () => {
             if (avatarFile) formData.append('avatar', avatarFile);
             if (resumeFile) formData.append('resume', resumeFile);
 
-            const res = await API.put('/profile', formData, config);
+            // API handles Content-Type automatically for FormData
+            const res = await API.put('/profile', formData);
             
             localStorage.setItem('user', JSON.stringify(res.data));
             toast.success("Profile updated successfully!");
@@ -75,7 +77,7 @@ const EditProfile = () => {
 
         } catch (err) {
             console.error(err);
-            toast.error("Error updating profile");
+            toast.error(err.response?.data?.message || "Error updating profile");
         } finally {
             setLoading(false);
         }
