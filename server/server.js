@@ -41,7 +41,7 @@ app.use(express.static(path.join(__dirname, 'dist')));
 // 2. The Catch-All Handler:
 // If a user goes to ANY page (like /dashboard or /login), send them index.html
 // This fixes the 404 errors on refresh!
-app.get('*', (req, res) => {
+app.get(/.*/, (req, res) => {
     res.sendFile(path.resolve(__dirname, 'dist', 'index.html'));
 });
 

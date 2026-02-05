@@ -284,8 +284,31 @@ exports.getSavedJobs = async (req, res) => {
 // 14. GET PUBLIC JOBS
 exports.getPublicJobs = async (req, res) => {
     try {
+        const totalJobs = await Job.countDocuments();
+        
+        if (totalJobs === 0) {
+            const admin = await User.findOne({}); 
+            
+            if (admin) {
+                const seedJobs = [
+                    { title: "Software Engineer III", company: "Google", location: "Bangalore", salary: "₹35L - ₹50L", description: "Google Cloud infra.", postedAt: new Date(), requiredSkills: ["Go", "Kubernetes", "Distributed Systems"] },
+                    { title: "Frontend Developer", company: "Netflix", location: "Remote", salary: "₹45L", description: "Netflix TV UI.", postedAt: new Date(), requiredSkills: ["React", "JavaScript", "Performance"] },
+                    { title: "SDE-2 (Backend)", company: "Amazon", location: "Hyderabad", salary: "₹38L", description: "Amazon Pay systems.", postedAt: new Date(), requiredSkills: ["Java", "DynamoDB", "AWS"] },
+                    { title: "Product Designer", company: "Airbnb", location: "Remote", salary: "₹25L", description: "Design experiences.", postedAt: new Date(), requiredSkills: ["Figma", "UI/UX"] },
+                    { title: "Full Stack Engineer", company: "Zomato", location: "Gurugram", salary: "₹22L", description: "Order systems.", postedAt: new Date(), requiredSkills: ["Node.js", "React", "MongoDB"] },
+                    { title: "Data Scientist", company: "Microsoft", location: "Bangalore", salary: "₹40L", description: "Azure AI.", postedAt: new Date(), requiredSkills: ["Python", "PyTorch", "Azure"] }
+                ];
+                
+                const jobsWithUser = seedJobs.map(job => ({ ...job, postedBy: admin._id }));
+                await Job.insertMany(jobsWithUser);
+                console.log("✅ Database was empty. Auto-Seeded 6 jobs.");
+            }
+        }
+        
+
         const { search } = req.query;
         let query = {};
+        
         if (search) {
             query = {
                 $or: [
@@ -296,13 +319,17 @@ exports.getPublicJobs = async (req, res) => {
                 ]
             };
         }
+
         const limit = search ? 12 : 6;
+        
         const jobs = await Job.find(query)
             .select('title company location salary requiredSkills postedAt description')
             .sort({ postedAt: -1 }) 
             .limit(limit)
             .lean();
+            
         res.json(jobs);
+        
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');

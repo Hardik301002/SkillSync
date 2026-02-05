@@ -19,10 +19,10 @@ const {
     getRecommendedJobs, getMyApplications, getJobById, createJob, 
     getJobApplications, updateApplicationStatus, deleteJob, deleteApplication,
     updateJob, getJobStats, getMyPostedJobs, toggleSavedJob, getSavedJobs,
-    getAllJobsAdmin, getPublicJobs, seedRealJobs
+    getAllJobsAdmin, getPublicJobs
 } = require('../controllers/jobController');
 
-// --- MULTER CONFIGURATION ---
+// --- MULTER CONFIGURATION (Keep as is) ---
 const storage = multer.diskStorage({
     destination: function (req, file, cb) { cb(null, 'uploads/'); },
     filename: function (req, file, cb) { cb(null, Date.now() + '-' + file.originalname); }
@@ -41,25 +41,20 @@ const upload = multer({ storage: storage, fileFilter: fileFilter });
 const cpUpload = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'resume', maxCount: 1 }]);
 
 //  AUTH ROUTES
-
 router.post('/register', registerUser);
 router.post('/login', loginUser);
 router.put('/profile', auth, cpUpload, updateUserProfile);
 
 //  COMPANY ROUTES
-
 router.use('/companies', require('./companyRoutes'));
 
 //  ADMIN ROUTES
-
 router.get('/admin/users', auth, admin, getAllUsers);     
 router.delete('/admin/users/:id', auth, admin, deleteUser); 
 router.get('/admin/jobs', auth, admin, getAllJobsAdmin);    
 
 //  JOB ROUTES
-
 router.get('/public-jobs', getPublicJobs);
-router.get('/seed-real-jobs', seedRealJobs); 
 router.get('/recommendations', auth, getRecommendedJobs);
 router.get('/stats', auth, getJobStats);
 router.get('/my-posted-jobs', auth, getMyPostedJobs);
@@ -70,14 +65,12 @@ router.post('/jobs', auth, createJob);
 router.delete('/jobs/:id', auth, deleteJob);
 router.put('/jobs/:id', auth, updateJob);
 
-//  APPLICATION ROUTES
-
+//  APPLICATION ROUTES (Keep the rest exactly the same)
 router.get('/applications', auth, getMyApplications);
 router.get('/jobs/:jobId/applications', auth, getJobApplications);
 router.put('/applications/:id/status', auth, updateApplicationStatus);
 router.delete('/applications/:id', auth, deleteApplication);
 
-// Apply Route (With Email Notification)
 router.post('/apply', auth, upload.single('resume'), async (req, res) => {
     try {
         const { jobId, jobTitle, company } = req.body;
@@ -99,35 +92,11 @@ router.post('/apply', auth, upload.single('resume'), async (req, res) => {
         });
 
         await newApplication.save();
-
-        // Send Email Confirmation
-        const user = await User.findById(userId);
-        const message = `
-            <div style="font-family: sans-serif; padding: 20px;">
-                <h2 style="color: #2c1e6d;">Application Received! 📝</h2>
-                <p>Hi ${user.name},</p>
-                <p>You have successfully applied for the position of <strong>${jobTitle}</strong> at <strong>${company}</strong>.</p>
-                <p>The recruiter will review your profile shortly.</p>
-                <p>Good luck!</p>
-            </div>
-        `;
-
-        try {
-            await sendEmail({ email: user.email, subject: `Application Sent: ${jobTitle} at ${company}`, message });
-        } catch (err) { console.error("Email failed:", err.message); }
-
         res.json({ message: "Application Submitted Successfully!" });
     } catch (error) { 
         console.error("Apply Error:", error.message);
         res.status(500).json({ message: "Server Error" }); 
     }
-});
-
-//  UTILS (For Dev/Testing)
-
-router.get('/clear-apps', async (req, res) => { 
-    try { await Application.deleteMany({}); res.json({ message: "✅ Apps Deleted" }); } 
-    catch (err) { res.status(500).json({ error: err.message }); } 
 });
 
 module.exports = router;
