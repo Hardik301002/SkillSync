@@ -9,7 +9,6 @@ client/.env
 server/.env
 
 # Build outputs
-dist/
 build/
 
 # Uploaded files (We don't want demo images on GitHub)
